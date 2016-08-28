@@ -1,0 +1,19 @@
+{
+  "name": "aod/wordpress-plugin-boilerplate",
+  "description": "A set of classes and functions to get you started on making a WordPress plugin",
+  "minimum-stability": "dev",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Adrian Ortega",
+      "email": "hello@aortegadesign.com"
+    }
+  ],
+  "autoload": {
+    "psr-4" : {
+      "AOD\\": "includes",
+      "AOD\\Admin\\": "admin/",
+      "AOD\\Frontend\\": "frontend/"
+    }
+  }
+}

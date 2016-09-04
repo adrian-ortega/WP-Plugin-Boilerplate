@@ -102,8 +102,9 @@ class Plugin
      */
     public function init($name = "AOD WP Plugin Boilerplate", $version = '1.0.0')
     {
-        $this->with('plugin_name', $name);
-        $this->with('plugin_version', $version);
+        $this->with( 'plugin_name', $name );
+        $this->with( 'plugin_version', $version );
+        $this->with( 'plugin_text_domain', sanitize_title( $name ) );
         return $this;
     }
 

@@ -49,16 +49,16 @@ class Metabox
      */
     protected $container;
 
-    public function __construct()
-    {
-        $this->container = Plugin::getInstance()->getContainer();
-        $loader = Plugin::getInstance()->getLoader();
-        $this->htmlID = sanitize_title($this->name. ' aod metabox');
+    /**
+     * @var string|null
+     */
+    protected $textDomain;
 
-        if(is_admin() ){
-            $loader->add_action('admin_init', [$this, 'add']);
-            $loader->add_action('save_post', [$this, 'save']);
-        }
+    public function __construct(Container $container)
+    {
+        $this->container = $container;
+        $this->textDomain = $this->container->get('plugin_text_domain');
+        $this->htmlID = sanitize_title($this->name. ' aod metabox');
     }
 
     /**
@@ -285,6 +285,12 @@ class Metabox
         return get_post_meta($post, $class::METAKEY, true);
     }
 
+    /**
+     * @param array $a
+     * @param array|null $b
+     *
+     * @return array
+     */
     protected function parseMeta(&$a, $b)
     {
         $a = (array) $a;
@@ -342,6 +348,15 @@ class Metabox
             $this->parseMeta($class::$defaults, $this->getMeta($post));
     }
 
+    public function run() {
+        if(is_admin() ){
+            $loader = $this->container->get('loader');
+
+            $loader->add_action('admin_init', [$this, 'add']);
+            $loader->add_action('save_post', [$this, 'save']);
+        }
+    }
+
     /**
      * Returns either all meta data or one by key if passed.
      * @param  \WP_Post|int $post
@@ -350,9 +365,6 @@ class Metabox
      */
     public static function meta($post, $key = null)
     {
-        /** @var Plugin $GCDCApp */
-        global $GCDCApp;
-
         if(is_object($post)) {
             $post = $post->ID;
         }

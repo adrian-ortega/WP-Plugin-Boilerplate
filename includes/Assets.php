@@ -1,6 +1,8 @@
 <?php
 
-namespace AOD;
+namespace GcKit;
+
+use GcKit\Container;
 
 class Assets
 {
@@ -42,6 +44,8 @@ class Assets
      * @var mixed
      */
     protected $version;
+
+    protected $media;
 
     public function __construct(Container $container)
     {
@@ -92,11 +96,16 @@ class Assets
     public function add_style($handle, $source, $dependencies = [], $version = false, $media = 'all') {
         $this->styles[] = [
             'handle' => $this->prefix . $handle,
-            'source' => $source,
+            'source' => $this->base_dir .($this->isAdmin ? 'admin/' : 'frontend/') . 'assets/' . $source,
             'dependencies' => $dependencies,
             'version' => $version ? $version : $this->version,
             'media' => $media,
         ];
+        return $this;
+    }
+
+    public function enqueue_media() {
+        $this->media = true;
         return $this;
     }
 
@@ -109,6 +118,10 @@ class Assets
         $styles = $this->styles;
         $hook = ($this->isAdmin ? 'admin' : 'wp') . '_enqueue_scripts';
         $this->loader->add_action($hook, function() use($scripts, $styles) {
+            if($this->isAdmin && $this->media) {
+                wp_enqueue_media();
+            }
+
             if(count($scripts) > 0) {
                 foreach($scripts as $item) {
                     wp_enqueue_script(

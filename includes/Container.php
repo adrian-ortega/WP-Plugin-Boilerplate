@@ -61,7 +61,7 @@ class Container implements ArrayAccess
         if( $item instanceof \Closure || is_callable($item) )  {
 
             // Instantiate the callable and pass this container into it.
-            $item = call_user_func_array( $this->items[$offset], [ $this ] );
+            $item = call_user_func_array( $this->items[$offset], [ &$this ] );
         }
 
         // Finally, its saved into cache for future calls
@@ -136,9 +136,13 @@ class Container implements ArrayAccess
         return $this->offsetGet( $item );
     }
 
-    public function getCallables()
+    /**
+     * Returns runnable objects
+     * @return array
+     */
+    public function getRunables()
     {
-        $callables = [];
+        $runables = [];
 
         // If items have not been instantiated, this will make sure that they are
         // and stored in cache. Since offsetGet looks at cache first, items already
@@ -151,10 +155,10 @@ class Container implements ArrayAccess
         // the closures that were passed to the container
         foreach($this->cache as $offset => $item) {
             if(is_object($item)) {
-                $callables[$offset] = $item;
+                $runables[$offset] = $item;
             }
         }
 
-        return $callables;
+        return $runables;
     }
 }

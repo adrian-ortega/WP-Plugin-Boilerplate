@@ -1,11 +1,18 @@
 <?php
 
-namespace GcKit;
+namespace AOD;
 
-use GcKit\Container;
+use AOD\Container;
+use AOD\Traits\Runable;
 
 class Assets
 {
+    use Runable;
+
+    /**
+     * Sets the Admin Flag
+     * @var bool
+     */
     public $isAdmin = false;
 
     /**
@@ -15,16 +22,16 @@ class Assets
     protected $scripts = [];
 
     /**
+     * Holds all javascript objects that need to be loaded before a specific script
+     * @var array
+     */
+    protected $localizedObjects = [];
+
+    /**
      * Holds all styles to be enqueued when this class runs
      * @var array
      */
     protected $styles = [];
-
-    /**
-     * Holds the global plugin loader
-     * @var Loader
-     */
-    protected $loader;
 
     /**
      * Used to store the plugin base url path
@@ -45,11 +52,16 @@ class Assets
      */
     protected $version;
 
-    protected $media;
+    /**
+     * WP Media flag
+     * @var bool
+     */
+    protected $media = false;
 
-    public function __construct(Container $container)
+    public function __construct(Container &$container)
     {
-        $this->loader   = $container->get('loader');
+        $this->init($container);
+
         $this->base_dir = $container->get('plugin_url');
         $this->version  = $container->get('plugin_version');
         $this->prefix   = sanitize_title($container->get('plugin_name') . '_');
@@ -73,7 +85,7 @@ class Assets
      * @param bool $footer
      * @return $this
      */
-    public function add_script($handle, $source, $dependencies = [], $version = false, $footer = false) {
+    public function addScript($handle, $source, $dependencies = [], $version = false, $footer = false) {
         $this->scripts[] = [
             'handle' => $this->prefix . $handle,
             'source' => $this->base_dir .($this->isAdmin ? 'admin/' : 'frontend/') . 'assets/' . $source,
@@ -86,6 +98,23 @@ class Assets
     }
 
     /**
+     * Registers a javascript object
+     * @param string $scriptHandle
+     * @param string $objName
+     * @param array $objData
+     * @return $this
+     */
+    public function localObject($scriptHandle, $objName, array $objData)
+    {
+        $this->localizedObjects[] = [
+            'handle' => $this->prefix . $scriptHandle,
+            'object' => $objName,
+            'data' => $objData
+        ];
+        return $this;
+    }
+
+    /**
      * @param string $handle
      * @param string $source
      * @param array $dependencies
@@ -93,7 +122,7 @@ class Assets
      * @param string $media
      * @return $this
      */
-    public function add_style($handle, $source, $dependencies = [], $version = false, $media = 'all') {
+    public function addStyle($handle, $source, $dependencies = [], $version = false, $media = 'all') {
         $this->styles[] = [
             'handle' => $this->prefix . $handle,
             'source' => $this->base_dir .($this->isAdmin ? 'admin/' : 'frontend/') . 'assets/' . $source,
@@ -104,7 +133,11 @@ class Assets
         return $this;
     }
 
-    public function enqueue_media() {
+    /**
+     * Sets the Media flag
+     * @return $this
+     */
+    public function enqueueMedia() {
         $this->media = true;
         return $this;
     }
@@ -114,17 +147,14 @@ class Assets
      */
     public function run()
     {
-        $scripts = $this->scripts;
-        $styles = $this->styles;
-        $hook = ($this->isAdmin ? 'admin' : 'wp') . '_enqueue_scripts';
-        $this->loader->add_action($hook, function() use($scripts, $styles) {
+        $this->getLoader()->addAction(($this->isAdmin ? 'admin' : 'wp') . '_enqueue_scripts', function() {
             if($this->isAdmin && $this->media) {
                 wp_enqueue_media();
             }
 
-            if(count($scripts) > 0) {
-                foreach($scripts as $item) {
-                    wp_enqueue_script(
+            if(count($this->scripts) > 0) {
+                foreach ($this->scripts as $item) {
+                    wp_register_script(
                         $item['handle'],
                         $item['source'],
                         $item['dependencies'],
@@ -133,16 +163,31 @@ class Assets
                     );
                 }
             }
+            if(count($this->localizedObjects) > 0) {
+                foreach($this->localizedObjects as $obj) {
+                    wp_localize_script($obj['handle'], $obj['object'], $obj['data']);
+                }
+            }
 
-            if(count($styles) > 0) {
-                foreach($styles as $item) {
-                    wp_enqueue_style(
+            if(count($this->scripts) > 0) {
+                foreach($this->scripts as $item) {
+                    wp_enqueue_script($item['handle']);
+                }
+            }
+
+            if(count($this->styles) > 0) {
+                foreach($this->styles as $item) {
+                    wp_register_style(
                         $item['handle'],
                         $item['source'],
                         $item['dependencies'],
                         $item['version'],
                         $item['media']
                     );
+                }
+
+                foreach($this->styles as $item) {
+                    wp_enqueue_style($item['handle']);
                 }
             }
         });

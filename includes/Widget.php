@@ -23,10 +23,19 @@ class Widget extends \WP_Widget {
         );
     }
 
+    /**
+     * Sets the container
+     * @param Container $container
+     */
     public function setContainer( Container $container ) {
         $this->container = $container;
     }
 
+    /**
+     * Sets the widget name
+     * @param string $name
+     * @return $this
+     */
     public function setName( $name ) {
         $this->widgetName = sprintf( __( 'GC - %s', $this->textDomain() ), $name );
         $this->widgetId   = 'gck-' . sanitize_title( $name );
@@ -34,12 +43,21 @@ class Widget extends \WP_Widget {
         return $this;
     }
 
+    /**
+     * Sets the widget's description
+     * @param string $description
+     * @return $this
+     */
     public function setDescription( $description ) {
         $this->widgetDescription = $description;
 
         return $this;
     }
 
+    /**
+     * Returns the text domain for the plugin
+     * @return mixed|null
+     */
     public function textDomain() {
         return $this->container->get( 'plugin_text_domain' );
     }
@@ -48,10 +66,21 @@ class Widget extends \WP_Widget {
     // Just in case
     ////////////////////////////////////////////////////////////////////////
 
+    /**
+     * This is meant to be overridden by the extending class
+     * @param array $instance
+     * @return void
+     */
     public function form( $instance ) {
         echo '<p>Looks like you forgot to over-ride the `GcKit\\Widget::form()` method in the `' . get_called_class() . '` class.</p>';
     }
 
+    /**
+     * This is meant to be overridden by the extending class
+     * @param array $args
+     * @param array $instance
+     * @return void
+     */
     public function widget( $args, $instance ) {
         echo '<p>Looks like you forgot to over-ride the `GcKit\\Widget::widget()` method in the `' . get_called_class() . '` class.</p>';
     }
@@ -60,6 +89,12 @@ class Widget extends \WP_Widget {
     //  HTML Inputs
     ////////////////////////////////////////////////////////////////////////
 
+    /**
+     * Returns an HTML Label element
+     * @param string $id
+     * @param string $label
+     * @return string
+     */
     public function label( $id, $label ) {
         $id    = $this->get_field_id( $id );
         $label = sprintf( __( '%s', $this->textDomain() ), $label );
@@ -67,6 +102,13 @@ class Widget extends \WP_Widget {
         return "<label for=\"{$id}\">{$label}</label>";
     }
 
+    /**
+     * Returns a paragraph HTMl Element with a help class to match
+     * WordPress's admin styling
+     * @param string $text
+     * @param string $arrow
+     * @return string
+     */
     public function helpBlock( $text = '', $arrow = 'up' ) {
         $html = '<p class="help">';
         $html .= '<small>';
@@ -80,6 +122,14 @@ class Widget extends \WP_Widget {
         return $html;
     }
 
+    /**
+     * Returns a text input HTML box
+     * @param string $_id
+     * @param string $value
+     * @param string $class
+     * @param string $type
+     * @return string
+     */
     public function textInput( $_id, $value, $class = "", $type = 'text' ) {
         $class = implode( " ", array_merge( [ 'widefat' ], (array) $class ) );
         $id    = $this->get_field_id( $_id );
@@ -88,6 +138,13 @@ class Widget extends \WP_Widget {
         return "<input type=\"{$type}\" class=\"{$class}\" id=\"{$id}\" name=\"{$name}\" value=\"{$value}\">";
     }
 
+    /**
+     * Returns a textarea HTMl input box
+     * @param string $_id
+     * @param string $value
+     * @param string $class
+     * @return string
+     */
     public function textareaInput( $_id, $value, $class = '' ) {
         $class = implode( " ", array_merge( [ 'widefat' ], (array) $class ) );
         $id    = $this->get_field_id( $_id );
@@ -96,10 +153,23 @@ class Widget extends \WP_Widget {
         return "<textarea class=\"{$class}\" id=\"$id\" name=\"$name\" rows=\"7\">{$value}</textarea>";
     }
 
+    /**
+     * Returns a hidden input HTML element
+     * @param string $id
+     * @param string $value
+     * @return string
+     */
     public function hiddenInput( $id, $value ) {
         return $this->textInput( $id, $value, 'hidden' );
     }
 
+    /**
+     * Returns an HTML select dropdown element
+     * @param string $_id
+     * @param int|string $value
+     * @param array $options
+     * @return string
+     */
     public function dropdownInput( $_id, $value = 0, $options = [] ) {
         $id   = $this->get_field_id( $_id );
         $name = $this->get_field_name( $_id );
@@ -113,6 +183,10 @@ class Widget extends \WP_Widget {
         return $html;
     }
 
+    /**
+     * Returns the HTML for the upload media elements
+     * @param $instance
+     */
     public function imageUpload( $instance ) {
         ?>
         <div data-gck-upload-image>
@@ -137,6 +211,14 @@ class Widget extends \WP_Widget {
         <?php
     }
 
+    /**
+     * Returns a checkbox or radio input HTML element
+     * @param string $_id
+     * @param string $label
+     * @param int|string $current
+     * @param string $type
+     * @return string
+     */
     public function selectionInput( $_id, $label, $current, $type = 'checkbox' ) {
         if ( is_array( $_id ) ) {
             $id   = $this->get_field_id( $_id[1] );
@@ -163,6 +245,14 @@ class Widget extends \WP_Widget {
         return $html;
     }
 
+    /**
+     * Returns html for a set of checkboxes or radio inputs to select from
+     * @param string $_id
+     * @param array $options
+     * @param array $selected
+     * @param string $type
+     * @return string
+     */
     public function selectionList( $_id, $options = [], $selected = [], $type = 'checkbox' ) {
 
         $id   = $this->get_field_id( $_id );

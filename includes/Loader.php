@@ -27,27 +27,51 @@ class Loader
     }
 
     /**
-     * Adds an action
-     * @param string    $hook          the name of the hook we want to register to
-     * @param callable  $callback      The callback function, either a closure, function string or object
-     * @param integer   $priority      Priority of the action
-     * @param integer   $accepted_args The number of accepted arguments for the callable
+     * Adds an activation hook for the plugin
+     * @param callable $callback
      */
-    public function add_action($hook, $callback, $priority = 10, $accepted_args = 1)
+    public function addActivationHook($callback)
+    {
+        $file = plugin_basename($this->container->get('plugin_file'));
+        $this->addAction("activation_{$file}", $callback);
+    }
+
+    /**
+     * Adds a deactiavation hook for the plugin
+     * @param callable $callback
+     */
+    public function addDeactivationHook($callback)
+    {
+        $file = plugin_basename($this->container->get('plugin_file'));
+        add_action("deactivate_{$file}", $callback);
+    }
+
+    /**
+     * Adds an action
+     * @param string   $hook          The name of the hook we want to register to
+     * @param callable $callback      The callback function, either a closure, function string or object
+     * @param integer  $priority      Priority of the action
+     * @param integer  $accepted_args The number of accepted arguments for the callable
+     * @return $this
+     */
+    public function addAction($hook, $callback, $priority = 10, $accepted_args = 1)
     {
         $this->add($this->actions, $hook, $callback, $priority, $accepted_args);
+        return $this;
     }
 
     /**
      * Adds a filter
-     * @param string    $hook          the name of the hook we want to register to
-     * @param callable  $callback      The callback function, either a closure, function string or object
-     * @param integer   $priority      Priority of the action
-     * @param integer   $accepted_args The number of accepted arguments for the callable
+     * @param string   $hook          The name of the hook we want to register to
+     * @param callable $callback      The callback function, either a closure, function string or object
+     * @param integer  $priority      Priority of the action
+     * @param integer  $accepted_args The number of accepted arguments for the callable
+     * @return $this
      */
-    public function add_filter($hook, $callback, $priority = 10, $accepted_args = 1)
+    public function addFilter($hook, $callback, $priority = 10, $accepted_args = 1)
     {
         $this->add($this->filters, $hook, $callback, $priority, $accepted_args);
+        return $this;
     }
 
     /**
@@ -60,14 +84,12 @@ class Loader
      */
     private function add(&$hooks, $hook, $callback, $priority, $accepted_args)
     {
-
         $hooks[] = [
             'hook' => $hook,
             'callback' => $callback,
             'priority' => $priority,
             'accepted_args' => $accepted_args
         ];
-
     }
 
     /**

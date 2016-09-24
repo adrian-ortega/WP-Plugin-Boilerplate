@@ -35,8 +35,8 @@ $AODPlugin->init('AOD WP Plugin Boilerplate', '1.0.0');
 $AODPlugin->with('admin_scripts', function(\AOD\Container $c) {
     $assets = new \AOD\Assets($c);
     $assets->isAdmin();
-    $assets->add_script('main', 'js/main.js', ['jquery']);
-    $assets->add_style('styles', 'css/styles.css');
+    $assets->addScript('main', 'js/main.js', ['jquery']);
+    $assets->addStyle('styles', 'css/styles.css');
 
     return $assets;
 });

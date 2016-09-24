@@ -6,11 +6,6 @@ namespace AOD;
 class Plugin
 {
     /**
-     * @var Plugin
-     */
-    protected static $instance;
-
-    /**
      * @var Container
      */
     protected $container;
@@ -20,13 +15,6 @@ class Plugin
      */
     protected $loader;
 
-    /**
-     * Used to store dependency directory paths
-     * to be loaded later
-     * @var array
-     */
-    protected $fileDependencies = [];
-
     protected function __construct($pluginFile = null)
     {
         if(empty($pluginFile)){
@@ -34,15 +22,13 @@ class Plugin
         }
 
         $this->container = new Container([
+            'plugin_file' => $pluginFile,
             'plugin_path' => plugin_dir_path( $pluginFile ),
             'plugin_url' => plugin_dir_url( $pluginFile ),
             'loader' => function(Container $c) {
                 return new Loader($c);
             }
         ]);
-
-
-
     }
 
     /**
@@ -52,13 +38,15 @@ class Plugin
      */
     public static function getInstance($pluginFile = null)
     {
-        if(empty(self::$instance) && !empty($pluginFile)) {
-            self::$instance = new static( $pluginFile );
-        } else {
-            throw new \InvalidArgumentException('`$pluginFile` cannot be empty when first instantiating the Plugin class');
+        static $instance;
+        if(empty($instance)) {
+            if(empty($pluginFile)) {
+                throw new \InvalidArgumentException('`$pluginFile` cannot be empty when first instantiating the Plugin class');
+            }
+            $instance = new static( $pluginFile );
         }
 
-        return self::$instance;
+        return $instance;
     }
 
     /**
@@ -89,9 +77,16 @@ class Plugin
         return $this->getContainer()->get($item);
     }
 
+    /**
+     * Wrapper for the container's set method
+     * @param string $key
+     * @param callable|mixed $item
+     * @return $this
+     */
     public function with($key, $item)
     {
         $this->getContainer()->set($key, $item);
+        return $this;
     }
 
     /**
@@ -113,7 +108,7 @@ class Plugin
      */
     public function run()
     {
-        foreach( $this->getContainer()->getCallables() as $name => $callable) {
+        foreach($this->getContainer()->getRunables() as $name => $callable) {
 
             // Check to see if this class object has a run method and instantiate it.
             if($name != 'loader' && method_exists($callable, 'run')) {

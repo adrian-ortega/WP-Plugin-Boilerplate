@@ -4,7 +4,6 @@ namespace AOD;
 
 class Metabox
 {
-
     const METAKEY = 'undefined';
     const USE_SINGLE_KEYS = false;
 
@@ -348,12 +347,15 @@ class Metabox
             $this->parseMeta($class::$defaults, $this->getMeta($post));
     }
 
+    /**
+     * Register the metabox
+     */
     public function run() {
         if(is_admin() ){
             $loader = $this->container->get('loader');
 
-            $loader->add_action('admin_init', [$this, 'add']);
-            $loader->add_action('save_post', [$this, 'save']);
+            $loader->addAction('admin_init', [$this, 'add']);
+            $loader->addAction('save_post', [$this, 'save']);
         }
     }
 
@@ -361,9 +363,10 @@ class Metabox
      * Returns either all meta data or one by key if passed.
      * @param  \WP_Post|int $post
      * @param  string $key
+     * @param Container $container
      * @return mixed
      */
-    public static function meta($post, $key = null)
+    public static function meta($post, $key = null, Container $container = null)
     {
         if(is_object($post)) {
             $post = $post->ID;
@@ -376,7 +379,7 @@ class Metabox
         $class = get_called_class();
 
         /** @var Metabox $metabox */
-        $metabox = new $class();
+        $metabox = new $class($container);
         $values = $metabox->getMetaWithDefaults($post);
 
         if(!empty($key) && isset($values[$key])) {

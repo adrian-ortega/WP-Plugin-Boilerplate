@@ -8,7 +8,7 @@
  * Plugin Name:       AOD WP Plugin Boilerplate
  * Plugin URI:        https://github.com/adrian-ortega
  * Description:       A Wordpress Plugin boilerplate
- * Version:           1.0.0 
+ * Version:           2016.2
  * Author:            Adrian Ortega
  * Author URI:        https://github.com/adrian-ortega
  * License:           GPL-2.0+
@@ -30,7 +30,7 @@ require_once __DIR__ . '/vendor/autoload.php';
 $AODPlugin = AOD\Plugin::getInstance(__FILE__);
 
 // Set the plugin name and version
-$AODPlugin->init('AOD WP Plugin Boilerplate', '1.0.0');
+$AODPlugin->init('AOD WP Plugin Boilerplate', '2016.2');
 
 $AODPlugin->with('admin_scripts', function(\AOD\Container $c) {
     $assets = new \AOD\Assets($c);

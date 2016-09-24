@@ -59,7 +59,7 @@ class Widget extends \WP_Widget {
      * @return mixed|null
      */
     public function textDomain() {
-        return $this->container->get( 'plugin_text_domain' );
+        return $this->container->get( 'localization' )->getDomain();
     }
 
     ////////////////////////////////////////////////////////////////////////

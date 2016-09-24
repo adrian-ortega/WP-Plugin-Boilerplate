@@ -48,15 +48,9 @@ class Metabox
      */
     protected $container;
 
-    /**
-     * @var string|null
-     */
-    protected $textDomain;
-
     public function __construct(Container $container)
     {
         $this->container = $container;
-        $this->textDomain = $this->container->get('plugin_text_domain');
         $this->htmlID = sanitize_title($this->name. ' aod metabox');
     }
 
@@ -153,6 +147,14 @@ class Metabox
      */
     public function display(\WP_Post $post) { }
 
+    /**
+     * Returns the plugins text domain
+     * @return string
+     */
+    public function textDomain()
+    {
+        return $this->container->get( 'localization' )->getDomain();
+    }
 
     /**
      * Sets the name of the metabox
@@ -374,6 +376,10 @@ class Metabox
 
         if(empty($post)) {
             return false;
+        }
+
+        if(empty($container)) {
+            $container = Plugin::getInstance()->getContainer();
         }
 
         $class = get_called_class();

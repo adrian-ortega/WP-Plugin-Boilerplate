@@ -25,9 +25,9 @@ class Plugin
             'plugin_file' => $pluginFile,
             'plugin_path' => plugin_dir_path( $pluginFile ),
             'plugin_url' => plugin_dir_url( $pluginFile ),
-            'loader' => function(Container $c) {
+            'loader' => function(Container &$c) {
                 return new Loader($c);
-            }
+            },
         ]);
     }
 
@@ -100,6 +100,9 @@ class Plugin
         $this->with( 'plugin_name', $name );
         $this->with( 'plugin_version', $version );
         $this->with( 'plugin_text_domain', sanitize_title( $name ) );
+        $this->with( 'localization', function(Container &$c) {
+            return new Localization($c);
+        });
         return $this;
     }
 
